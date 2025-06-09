@@ -10,6 +10,8 @@ def app():
     # Check Firebase connection
     if not firebase_service.is_connected():
         st.error("❌ Firebase not connected. Please contact your instructor.")
+        if firebase_service.get_error_message():
+            st.error(firebase_service.get_error_message())
         return
 
     st.success("✅ Connected to Firebase")

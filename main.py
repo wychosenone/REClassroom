@@ -1,6 +1,5 @@
 import streamlit as st
-import reclassroom.instructor_ui
-import reclassroom.student_ui
+from reclassroom import instructor_ui, student_ui
 
 def main():
     st.set_page_config(
@@ -10,8 +9,8 @@ def main():
     )
 
     PAGES = {
-        "👨‍🏫 Instructor Environment": reclassroom.instructor_ui,
-        "👩‍🎓 Student Environment": reclassroom.student_ui
+        "👨‍🏫 Instructor Environment": instructor_ui,
+        "👩‍🎓 Student Environment": student_ui
     }
 
     st.sidebar.title('REClassroom Navigation')

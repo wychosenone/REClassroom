@@ -1,6 +1,5 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
-import streamlit as st
 import json
 import os
 from typing import Dict, List, Optional
@@ -14,6 +13,7 @@ class FirebaseService:
     
     def __init__(self):
         self.db = None
+        self.error_message = None
         self._initialize_firebase()
     
     def _initialize_firebase(self):
@@ -21,41 +21,29 @@ class FirebaseService:
         try:
             # Check if Firebase is already initialized
             if not firebase_admin._apps:
-                # Try to get credentials from Streamlit secrets first
-                if hasattr(st, 'secrets') and 'firebase' in st.secrets:
-                    # Using Streamlit secrets (recommended for deployment)
-                    firebase_config = dict(st.secrets["firebase"])
-                    cred = credentials.Certificate(firebase_config)
-                    firebase_admin.initialize_app(cred)
-                elif os.path.exists("firebase-credentials.json"):
+                # Try to get credentials from environment variable or file
+                if os.path.exists("firebase-credentials.json"):
                     # Using local credentials file
                     cred = credentials.Certificate("firebase-credentials.json")
                     firebase_admin.initialize_app(cred)
                 else:
                     # No credentials found
-                    st.error("❌ Firebase credentials not found. Please configure Firebase.")
-                    st.info("""
-                    **To configure Firebase:**
-                    
-                    1. Go to [Firebase Console](https://console.firebase.google.com/)
-                    2. Create a new project or select existing
-                    3. Go to Project Settings > Service Accounts
-                    4. Generate a new private key (JSON file)
-                    5. Either:
-                       - Save as `firebase-credentials.json` in project root, OR
-                       - Add to Streamlit secrets (for deployment)
-                    """)
+                    self.error_message = "Firebase credentials not found. Please configure Firebase."
                     return
             
             self.db = firestore.client()
             
         except Exception as e:
-            st.error(f"Failed to initialize Firebase: {str(e)}")
+            self.error_message = f"Failed to initialize Firebase: {str(e)}"
             return
     
     def is_connected(self) -> bool:
         """Check if Firebase is properly connected."""
         return self.db is not None
+    
+    def get_error_message(self) -> str:
+        """Get the error message if connection failed."""
+        return self.error_message
     
     # SCENARIO MANAGEMENT
     
@@ -74,7 +62,7 @@ class FirebaseService:
             return True
             
         except Exception as e:
-            st.error(f"Failed to save scenario: {str(e)}")
+            print(f"Failed to save scenario: {str(e)}")
             return False
     
     def get_scenario(self, scenario_id: str) -> Optional[Dict]:
@@ -91,7 +79,7 @@ class FirebaseService:
             return None
             
         except Exception as e:
-            st.error(f"Failed to get scenario: {str(e)}")
+            print(f"Failed to get scenario: {str(e)}")
             return None
     
     def list_scenarios(self) -> List[Dict]:
@@ -110,7 +98,7 @@ class FirebaseService:
             return scenarios
             
         except Exception as e:
-            st.error(f"Failed to list scenarios: {str(e)}")
+            print(f"Failed to list scenarios: {str(e)}")
             return []
     
     def delete_scenario(self, scenario_id: str) -> bool:
@@ -123,7 +111,7 @@ class FirebaseService:
             return True
             
         except Exception as e:
-            st.error(f"Failed to delete scenario: {str(e)}")
+            print(f"Failed to delete scenario: {str(e)}")
             return False
     
     # SESSION MANAGEMENT
@@ -148,7 +136,7 @@ class FirebaseService:
             return doc_ref.id
             
         except Exception as e:
-            st.error(f"Failed to create session: {str(e)}")
+            print(f"Failed to create session: {str(e)}")
             return None
     
     def update_session(self, session_id: str, session_data: Dict) -> bool:
@@ -165,7 +153,7 @@ class FirebaseService:
             return True
             
         except Exception as e:
-            st.error(f"Failed to update session: {str(e)}")
+            print(f"Failed to update session: {str(e)}")
             return False
     
     def get_session(self, session_id: str) -> Optional[Dict]:
@@ -182,7 +170,7 @@ class FirebaseService:
             return None
             
         except Exception as e:
-            st.error(f"Failed to get session: {str(e)}")
+            print(f"Failed to get session: {str(e)}")
             return None
     
     # INTERACTION LOGGING
@@ -198,14 +186,37 @@ class FirebaseService:
                 'timestamp': datetime.now()
             })
             
-            # Add to interactions subcollection
-            self.db.collection('sessions').document(session_id).collection('interactions').add(interaction_data)
+            # Auto-generate interaction ID
+            doc_ref = self.db.collection('interactions').document()
+            doc_ref.set(interaction_data)
             
             return True
             
         except Exception as e:
-            st.error(f"Failed to log interaction: {str(e)}")
+            print(f"Failed to log interaction: {str(e)}")
             return False
+    
+    def get_session_interactions(self, session_id: str) -> List[Dict]:
+        """Get all interactions for a session."""
+        if not self.is_connected():
+            return []
+            
+        try:
+            interactions = []
+            docs = (self.db.collection('interactions')
+                   .where('session_id', '==', session_id)
+                   .order_by('timestamp')
+                   .stream())
+            
+            for doc in docs:
+                interaction_data = doc.to_dict()
+                interactions.append(interaction_data)
+            
+            return interactions
+            
+        except Exception as e:
+            print(f"Failed to get session interactions: {str(e)}")
+            return []
 
-# Global Firebase service instance
+# Create a global instance
 firebase_service = FirebaseService() 

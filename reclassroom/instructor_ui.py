@@ -9,10 +9,21 @@ def app():
     # Check Firebase connection
     if not firebase_service.is_connected():
         st.error("❌ Firebase not connected. Please configure Firebase to continue.")
+        if firebase_service.get_error_message():
+            st.error(firebase_service.get_error_message())
+        
+        st.info("""
+        **To configure Firebase:**
+        
+        1. Go to [Firebase Console](https://console.firebase.google.com/)
+        2. Create a new project or select existing
+        3. Go to Project Settings > Service Accounts
+        4. Generate a new private key (JSON file)
+        5. Save as `firebase-credentials.json` in project root
+        """)
         return
 
     st.success("✅ Connected to Firebase")
-
     # Tabs for different instructor functions
     tab1, tab2 = st.tabs(["Create Scenario", "Manage Scenarios"])
     
