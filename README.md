@@ -1,41 +1,101 @@
-# REClassroom: Requirements Elicitation Simulation Platform
+# REClassroom
 
-REClassroom is an interactive educational tool designed to simulate requirements elicitation (RE) and negotiation scenarios using AI-driven personas. The platform allows instructors to create custom scenarios and enables students to practice eliciting requirements from multiple stakeholders.
+REClassroom is a Python-based educational platform designed for simulating requirements elicitation (RE) scenarios. It provides a dynamic environment where students can practice and hone their RE skills by interacting with AI-powered stakeholder personas.
 
-## 🏗️ System Architecture
+The application is built with Streamlit and features two distinct interfaces: one for instructors to design learning scenarios and one for students to engage with them.
 
-- **Instructor Configuration Environment**: Web interface for creating and managing RE scenarios
-- **Student Interaction Environment**: Chat-based interface for stakeholder negotiation
-- **AI Persona Engine**: Dynamic AI persona generation based on instructor configurations
-- **Multi-Agent Orchestration Core**: LangGraph-based dialogue management (coming soon)
-- **Firebase Integration**: Cloud-based data storage for scenarios and sessions
+## Core Features
 
-## 🚀 Quick Start
+*   **Instructor Environment**:
+    *   Create, manage, and delete RE scenarios.
+    *   Define a detailed project context, including name and description.
+    *   Design multiple, distinct AI stakeholder personas for each scenario.
+    *   Customize persona attributes like goals, background, communication style, and hidden constraints.
+    *   Set an interaction limit for each scenario to define the session's scope.
 
-### Prerequisites
+*   **Student Environment**:
+    *   Browse and select from available scenarios.
+    *   Interact with multiple AI stakeholders in a seamless chat interface.
+    *   Experience dynamic, context-aware conversations powered by an intelligent agent router.
+    *   View the remaining interaction count to manage the session effectively.
 
-- Python 3.8+
-- Firebase account and project
+*   **AI & Orchestration**:
+    *   Uses OpenAI's language models to bring stakeholder personas to life.
+    *   Employs LangGraph to orchestrate complex, multi-participant conversations.
+    *   Features an intelligent router that analyzes the student's input to select the most appropriate stakeholder to respond, creating a natural dialogue flow.
 
-### Installation
+*   **Persistence**:
+    *   Utilizes Google Firebase (Firestore) to save and load all scenario and session data, ensuring persistence and scalability.
+    *   Logs every student-agent interaction for review and analysis.
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd REClassroom
-   ```
+## Tech Stack
 
-2. **Install dependencies**
-   ```bash
-   pip install -r reclassroom/requirements.txt
-   ```
+*   **Application Framework**: Streamlit
+*   **AI & LLM Orchestration**: LangChain, LangGraph
+*   **LLM Provider**: OpenAI
+*   **Database**: Google Cloud Firestore
+*   **Core Language**: Python
 
-3. **Set up Firebase** (see detailed instructions below)
+## Setup and Installation
 
-4. **Run the application**
-   ```bash
-   streamlit run main.py
-   ```
+To run REClassroom locally, follow these steps:
+
+**1. Clone the Repository:**
+```bash
+git clone <your-repository-url>
+cd REClassroom
+```
+
+**2. Set up a Python Environment:**
+It is recommended to use a virtual environment.
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+```
+
+**3. Install Dependencies:**
+```bash
+pip install -r reclassroom/requirements.txt
+```
+
+**4. Configure Firebase:**
+*   Obtain your Firebase service account credentials (a `.json` file) from your Firebase project settings.
+*   Rename the file to `firebase-credentials.json` and place it in the root directory of this project.
+
+**5. Configure OpenAI API Key:**
+*   Create a file named `.streamlit/secrets.toml` in the project's root directory.
+*   Add your OpenAI API key to this file as follows:
+    ```toml
+    OPENAI_API_KEY="your-key-here"
+    ```
+
+## How to Run
+
+Once the setup is complete, you can run the Streamlit application from the root directory:
+
+```bash
+streamlit run main.py
+```
+
+The application will open in your web browser. You can navigate between the Student and Instructor environments using the sidebar.
+
+## Project Structure
+
+```
+REClassroom/
+├── main.py                    # Main application entry point
+├── reclassroom/
+│   ├── core/
+│   │   ├── agent_utils.py     # Utilities for AI agents
+│   │   ├── firebase_service.py # Handles all Firestore database operations
+│   │   ├── graph_state.py     # Defines the state for the LangGraph orchestrator
+│   │   ├── orchestration.py   # Manages the multi-agent conversation graph
+│   │   └── persona_engine.py  # Dynamically generates system prompts for AI personas
+│   ├── instructor_ui.py       # Defines the Streamlit UI for the instructor
+│   ├── student_ui.py          # Defines the Streamlit UI for the student
+│   └── requirements.txt       # Project dependencies
+└── README.md                  # This file
+```
 
 ## 🔥 Firebase Setup
 
@@ -148,7 +208,7 @@ The application will automatically create these collections:
 4. Start negotiating in the chat interface
 5. Session data is automatically logged to Firebase
 
-## 🔮 Coming Soon
+## Already Achieved
 
 - **AI Persona Engine**: OpenAI integration for dynamic personas
 - **Multi-Agent Orchestration**: LangGraph-based dialogue management
@@ -195,7 +255,6 @@ The next development phase will focus on:
 
 ## 📄 License
 
-[Add license information]
 
 ## 🆘 Troubleshooting
 
