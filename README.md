@@ -74,7 +74,7 @@ pip install -r reclassroom/requirements.txt
 Once the setup is complete, you can run the Streamlit application from the root directory:
 
 ```bash
-streamlit run main.py
+streamlit run reclassroom/Home.py
 ```
 
 The application will open in your web browser. You can navigate between the Student and Instructor environments using the sidebar.
